@@ -292,6 +292,7 @@ class FillingDataset(data.Dataset):
                 assert input_pos == input_ids_length_before_pad and output_pos == output_ids_length_before_pad
                 break
             elif input_ids[input_pos] == output_ids_masked[output_pos]:
+                output_ids_masked[output_pos] = -1  # mask the tokens that occur both in input and output
                 input_pos += 1
                 output_pos += 1
                 mask_start = False
@@ -306,7 +307,6 @@ class FillingDataset(data.Dataset):
                             break
                         input_pos += offset
                         mask_start = True
-                output_ids_masked[output_pos] = -1
                 output_pos += 1
 
         if abnormal_flag:
