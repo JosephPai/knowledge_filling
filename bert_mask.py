@@ -297,7 +297,7 @@ class FillingDataset(data.Dataset):
                 output_pos += 1
                 mask_start = False
             else:
-                if mask_start is False:
+                if mask_start is False:     # first token of the mask, calculate the offset of input_pos
                     while True:     # to deal with consecutive masks
                         offset = self.check_mask_start(input_ids, tokens, input_pos, mask_start)
                         if offset == -1:
@@ -309,10 +309,10 @@ class FillingDataset(data.Dataset):
                         mask_start = True
                 output_pos += 1
 
-        if abnormal_flag:
+        if abnormal_flag:       # if this is an abnormal sample, we just use the origin output_ids without mask
             output_padding = [-1] * (self.max_seq_length - len(output_ids))  # -1 to ignore tokens that are not in output sequence
             output_ids += output_padding
-        else:
+        else:   # else, we can use the output_ids_masked
             output_padding = [-1] * (self.max_seq_length - len(output_ids_masked))  # -1 to ignore tokens that are not in output sequence
             output_ids = output_ids_masked + output_padding
 
