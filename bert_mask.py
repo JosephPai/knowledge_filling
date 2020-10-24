@@ -39,7 +39,7 @@ def get_params():
     parser.add_argument("--batch_size", default=32, type=int)
     parser.add_argument("--eval_batch_size", default=64, type=int)
     parser.add_argument("--max_seq_length", default=512, type=int)
-    parser.add_argument("--workers", default=8)
+    parser.add_argument("--workers", default=0)
     parser.add_argument("--do_plot", default=True)
     parser.add_argument("--train_name", default="BERT-FillingBlank-SEP")
     args, unknown = parser.parse_known_args()
@@ -436,7 +436,7 @@ def train(args):
 
 
 def test_samples(args):
-    modeldir = os.path.join('TrainingSEP', args.train_name)
+    modeldir = os.path.join('TrainingMASK', args.train_name)
     # Prepare GPUs
     n_gpu = torch.cuda.device_count()
     logger.info("device: {} n_gpu: {}".format(args.device, n_gpu))
@@ -485,7 +485,7 @@ def test_samples(args):
 
                 # expected output
                 label_ids = output_ids[idx].cpu().data.numpy().tolist()
-                end_idx = label_ids.index(-1)
+                # end_idx = label_ids.index(-1)         # only matters without mask
                 label_ids = label_ids[:end_idx]
                 label_tokens = tokenizer.convert_ids_to_tokens(label_ids)
                 label_sent = tokenizer.convert_tokens_to_string(label_tokens)
@@ -498,22 +498,22 @@ def test_samples(args):
                 prediction_sentences.append(pred_sent)
 
     print('Writing to file.')
-    with open('filling_output_SEP/input.json', 'w') as j:
+    with open('filling_output_MASK/input.json', 'w') as j:
         json.dump(input_sentences_and_candidates, j)
-    with open('filling_output_SEP/label.json', 'w') as j:
+    with open('filling_output_MASK/label.json', 'w') as j:
         json.dump(expected_outputs, j)
-    with open('filling_output_SEP/output.json', 'w') as j:
+    with open('filling_output_MASK/output.json', 'w') as j:
         json.dump(prediction_sentences, j)
     print('Done!')
 
 
 def show_samples(num_samples=10, seed=123):
     random.seed(seed)
-    with open('filling_output_SEP/input.json', 'r') as j:
+    with open('filling_output_MASK/input.json', 'r') as j:
         input_sentences_and_candidates = json.load(j)
-    with open('filling_output_SEP/label.json', 'r') as j:
+    with open('filling_output_MASK/label.json', 'r') as j:
         expected_outputs = json.load(j)
-    with open('filling_output_SEP/output.json', 'r') as j:
+    with open('filling_output_MASK/output.json', 'r') as j:
         prediction_sentences = json.load(j)
     indices = random.sample(list(range(len(input_sentences_and_candidates))), k=num_samples)
     for i, idx in enumerate(indices):
@@ -527,7 +527,7 @@ def show_samples(num_samples=10, seed=123):
 
 if __name__ == "__main__":
     args = get_params()
-    train(args)
-    # test_samples(args)
-    # show_samples()
+    # train(args)
+    test_samples(args)
+    show_samples()
 
